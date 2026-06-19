@@ -1,0 +1,29 @@
+# Web framework
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+
+# Data validation / settings
+pydantic==2.10.4
+pydantic-settings==2.7.0
+
+# Database
+sqlalchemy==2.0.36
+# psycopg2-binary is the Postgres driver for production (Supabase).
+# Not needed for local SQLite dev, but listed so prod installs get it.
+psycopg2-binary==2.9.10
+
+# Auth — Firebase Admin verifies the frontend's Firebase ID tokens
+firebase-admin==6.6.0
+
+# AI providers (provider-agnostic layer imports lazily, so a missing
+# package only fails if that provider is actually selected)
+anthropic==0.42.0
+openai==1.59.6
+google-generativeai==0.8.3
+
+# Env file loading
+python-dotenv==1.0.1
+
+# Testing
+pytest==8.3.4
+httpx==0.28.1

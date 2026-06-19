@@ -1,0 +1,118 @@
+/* ============================================
+   DebateAI — Design Tokens
+   Palette: warm paper bg, ink text, indigo (AI) vs teal (You)
+   Type: Playfair Display Italic (display) + Inter (UI/body)
+   ============================================ */
+
+:root {
+  /* Surfaces */
+  --paper: #FAF9F6;
+  --paper-raised: #FFFFFF;
+  --paper-sunken: #F0EEE8;
+  --ink: #1A1A2E;
+  --ink-soft: #4A4A5C;
+  --ink-faint: #8A8A98;
+  --line: rgba(26, 26, 46, 0.10);
+  --line-strong: rgba(26, 26, 46, 0.18);
+
+  /* Brand duo: Indigo = AI opponent, Teal = You */
+  --indigo-50: #EEF0FF;
+  --indigo-100: #DCE0FE;
+  --indigo-400: #6C66E8;
+  --indigo-500: #4F46E5;
+  --indigo-600: #3F36C9;
+  --indigo-900: #221E5C;
+
+  --teal-50: #E9F7F3;
+  --teal-100: #CDEEE4;
+  --teal-400: #2BAA8E;
+  --teal-500: #0D9488;
+  --teal-600: #0A766D;
+  --teal-900: #0D3D38;
+
+  /* Functional accents */
+  --amber-500: #D97706;
+  --amber-50: #FEF3E2;
+  --coral-500: #DC2626;
+  --coral-50: #FDECEC;
+  --green-500: #16A34A;
+  --green-50: #EFFAF1;
+
+  /* Type */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  /* Shadows — used sparingly, mostly for floating elements */
+  --shadow-float: 0 8px 24px rgba(26, 26, 46, 0.14), 0 2px 6px rgba(26, 26, 46, 0.08);
+  --shadow-card: 0 1px 2px rgba(26, 26, 46, 0.06);
+
+  --container-max: 1180px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  scroll-behavior: smooth;
+}
+
+body { overflow-x: hidden; }
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.12;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+p { margin: 0; line-height: 1.6; }
+
+a { color: inherit; text-decoration: none; }
+
+button {
+  font-family: var(--font-body);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: inherit;
+  color: inherit;
+}
+
+img { max-width: 100%; display: block; }
+
+.container {
+  max-width: var(--container-max);
+  margin: 0 auto;
+  padding: 0 32px;
+}
+
+@media (max-width: 720px) {
+  .container { padding: 0 20px; }
+}
+
+:focus-visible {
+  outline: 2px solid var(--indigo-500);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

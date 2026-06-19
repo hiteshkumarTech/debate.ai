@@ -1,0 +1,23 @@
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+
+# Env / secrets — NEVER commit these
+.env
+.env.local
+.env.*.local
+firebase-service-account.json
+*-firebase-adminsdk-*.json
+
+# Build output
+dist/
+build/
+
+# Local DB
+*.db
+
+# Misc
+.pytest_cache/
+.DS_Store

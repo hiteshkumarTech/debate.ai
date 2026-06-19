@@ -1,0 +1,81 @@
+.floating-signin-wrap {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.floating-signin-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--paper-raised);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill);
+  padding: 12px 20px 12px 16px;
+  box-shadow: var(--shadow-float);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--ink);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.floating-signin-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(26, 26, 46, 0.18), 0 3px 8px rgba(26, 26, 46, 0.1);
+  border-color: var(--line);
+}
+
+.floating-signin-btn:active {
+  transform: translateY(0px) scale(0.98);
+}
+
+.floating-signin-btn:disabled {
+  opacity: 0.7;
+  cursor: wait;
+  transform: none;
+}
+
+.floating-signin-btn.is-signed-in {
+  background: var(--indigo-50);
+  border-color: var(--indigo-100);
+  color: var(--indigo-900);
+}
+
+.floating-signin-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--indigo-100);
+}
+
+.floating-signin-error {
+  background: var(--coral-50);
+  color: var(--coral-500);
+  font-size: 12.5px;
+  font-weight: 500;
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  max-width: 240px;
+  text-align: right;
+  box-shadow: var(--shadow-card);
+}
+
+@media (max-width: 560px) {
+  .floating-signin-wrap {
+    bottom: 18px;
+    right: 18px;
+  }
+  .floating-signin-label {
+    display: none;
+  }
+  .floating-signin-btn {
+    padding: 14px;
+    border-radius: 50%;
+  }
+}

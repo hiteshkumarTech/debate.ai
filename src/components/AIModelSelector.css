@@ -1,0 +1,87 @@
+.ai-selector {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.ai-option {
+  text-align: left;
+  background: var(--paper-raised);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ai-option:hover {
+  border-color: var(--line-strong);
+  transform: translateY(-1px);
+}
+
+.ai-option.is-selected {
+  border-color: var(--indigo-500);
+  box-shadow: 0 0 0 3px var(--indigo-50);
+}
+
+.ai-option-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ai-option-vendor {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ai-option-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 9px;
+  border-radius: var(--radius-pill);
+}
+
+.ai-option-badge.tone-default {
+  background: var(--green-50);
+  color: var(--green-500);
+}
+
+.ai-option-badge.tone-optional {
+  background: var(--paper-sunken);
+  color: var(--ink-faint);
+}
+
+.ai-option-name {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 600;
+  font-size: 19px;
+  color: var(--ink);
+}
+
+.ai-option-blurb {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.ai-selector.is-compact .ai-option {
+  padding: 10px 12px;
+  gap: 3px;
+}
+
+.ai-selector.is-compact .ai-option-name {
+  font-size: 15px;
+}
+
+@media (max-width: 640px) {
+  .ai-selector {
+    grid-template-columns: 1fr;
+  }
+}

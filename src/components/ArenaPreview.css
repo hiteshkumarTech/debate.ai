@@ -1,0 +1,132 @@
+.arena-preview {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  box-shadow: var(--shadow-float);
+  max-width: 420px;
+}
+
+.arena-preview-topic {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+
+.arena-preview-topic-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+}
+
+.arena-preview-topic-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.arena-preview-vs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.arena-preview-side {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 88%;
+}
+
+.arena-preview-side.ai {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.arena-preview-side-tag {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.arena-preview-side.you .arena-preview-side-tag {
+  color: var(--teal-600);
+}
+
+.arena-preview-side.ai .arena-preview-side-tag {
+  color: var(--indigo-600);
+}
+
+.arena-preview-bubble {
+  font-size: 13.5px;
+  line-height: 1.5;
+  padding: 10px 13px;
+  border-radius: var(--radius-md);
+}
+
+.arena-preview-side.you .arena-preview-bubble {
+  background: var(--teal-50);
+  color: var(--teal-900);
+  border-bottom-left-radius: 3px;
+}
+
+.arena-preview-side.ai .arena-preview-bubble {
+  background: var(--indigo-50);
+  color: var(--indigo-900);
+  border-bottom-right-radius: 3px;
+}
+
+.arena-preview-score {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.arena-preview-score-bars {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.arena-preview-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.arena-preview-bar-label {
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  width: 56px;
+  flex-shrink: 0;
+}
+
+.arena-preview-bar-track {
+  flex: 1;
+  height: 5px;
+  background: var(--paper-sunken);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.arena-preview-bar-fill {
+  height: 100%;
+  background: var(--indigo-500);
+  border-radius: var(--radius-pill);
+}
+
+@media (max-width: 920px) {
+  .arena-preview {
+    max-width: 100%;
+  }
+}

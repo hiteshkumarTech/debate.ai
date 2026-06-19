@@ -1,0 +1,229 @@
+.ach-page {
+  min-height: calc(100vh - 72px);
+  padding: 44px 0 80px;
+}
+
+.ach-container {
+  max-width: 900px;
+}
+
+.ach-head {
+  margin-bottom: 24px;
+}
+
+.ach-title {
+  font-size: 30px;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.ach-sub {
+  font-size: 14.5px;
+  color: var(--ink-soft);
+}
+
+/* Summary */
+.ach-summary {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 22px 26px;
+  margin-bottom: 36px;
+}
+
+.ach-summary-ring {
+  flex-shrink: 0;
+  width: 84px;
+  height: 84px;
+  border-radius: 50%;
+  background: var(--indigo-50);
+  border: 3px solid var(--indigo-500);
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1px;
+}
+
+.ach-summary-count {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--indigo-600);
+}
+
+.ach-summary-total {
+  font-size: 13px;
+  color: var(--ink-faint);
+}
+
+.ach-summary-body {
+  flex: 1;
+}
+
+.ach-summary-bar-track {
+  height: 10px;
+  background: var(--paper-sunken);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.ach-summary-bar-fill {
+  height: 100%;
+  background: var(--indigo-500);
+  border-radius: var(--radius-pill);
+  transition: width 0.5s ease;
+}
+
+.ach-summary-text {
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+/* Sections */
+.ach-section {
+  margin-bottom: 32px;
+}
+
+.ach-section-title {
+  font-size: 18px;
+  font-family: var(--font-display);
+  font-style: italic;
+  color: var(--ink);
+  margin-bottom: 16px;
+}
+
+.ach-loading {
+  background: var(--paper-raised);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 36px;
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 14px;
+}
+
+/* Grid + cards */
+.ach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.ach-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 22px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line);
+  background: var(--paper-raised);
+}
+
+.ach-card-icon {
+  font-size: 34px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.ach-card-name {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.ach-card-desc {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+/* Earned — tiered accent */
+.ach-card.is-earned {
+  border-width: 1.5px;
+}
+
+.ach-card.tier-bronze { border-color: #c9883f; background: #fbf3ea; }
+.ach-card.tier-silver { border-color: #9aa3ad; background: #f4f6f8; }
+.ach-card.tier-gold { border-color: #d4a017; background: #fdf6e0; }
+
+.ach-card-badge {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--green-500);
+}
+
+/* Locked — muted with progress */
+.ach-card.is-locked {
+  opacity: 0.92;
+}
+
+.ach-card.is-locked .ach-card-icon {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.ach-card.is-locked .ach-card-name {
+  color: var(--ink-soft);
+}
+
+.ach-card-progress {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.ach-card-progress-track {
+  height: 6px;
+  background: var(--paper-sunken);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+  margin-bottom: 4px;
+}
+
+.ach-card-progress-fill {
+  height: 100%;
+  background: var(--ink-faint);
+  border-radius: var(--radius-pill);
+  transition: width 0.5s ease;
+}
+
+.ach-card-progress-label {
+  font-size: 11px;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+/* CTA */
+.ach-cta {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.ach-cta-btn {
+  display: inline-block;
+  padding: 13px 28px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--paper);
+  font-size: 14.5px;
+  font-weight: 600;
+}
+
+@media (max-width: 760px) {
+  .ach-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .ach-summary {
+    flex-direction: column;
+    text-align: center;
+  }
+}
