@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useDebateHistory } from '../hooks/useDebateHistory';
+import { loadSessionDetail } from '../services/sessionService';
 import { PERSONALITIES } from '../data/personalities';
 import EmailAuthForm from '../components/EmailAuthForm';
 import './History.css';
@@ -87,22 +88,72 @@ function LockedView() {
         Sign in to see your past debates, scores, and progress over time. Your data is only visible to you.
       </p>
 
-      <button
-        type="button"
-        className="history-google-btn"
-        onClick={handleGoogleClick}
-        disabled={googleBusy}
-      >
+      <button type="button" className="history-google-btn" onClick={handleGoogleClick} disabled={googleBusy}>
         <GoogleIcon />
-        {googleBusy ? 'Signing in\u2026' : 'Continue with Google'}
+        {googleBusy ? 'Signing in…' : 'Continue with Google'}
       </button>
       {googleError && <p className="history-google-error">{googleError}</p>}
 
-      <div className="history-divider">
-        <span>or</span>
-      </div>
+      <div className="history-divider"><span>or</span></div>
 
       <EmailAuthForm />
+    </div>
+  );
+}
+
+const hdOverlay = { position: 'fixed', inset: 0, background: 'rgba(26,26,46,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20, zIndex: 200 };
+const hdPanel = { background: '#FFFFFF', borderRadius: 14, maxWidth: 640, width: '100%', maxHeight: '85vh', overflowY: 'auto', padding: '30px 24px 24px', position: 'relative', boxShadow: '0 8px 24px rgba(26,26,46,0.14)' };
+const hdClose = { position: 'absolute', top: 8, right: 14, border: 'none', background: 'transparent', fontSize: 28, lineHeight: 1, color: '#8A8A98', cursor: 'pointer' };
+
+function HistoryDetailModal({ detail, loading, onClose }) {
+  const persona = detail ? PERSONALITIES.find((p) => p.id === detail.personality) : null;
+  return (
+    <div style={hdOverlay} onClick={onClose}>
+      <div style={hdPanel} onClick={(e) => e.stopPropagation()}>
+        <button type="button" style={hdClose} onClick={onClose} aria-label="Close">×</button>
+
+        {loading && <p style={{ color: '#8A8A98', margin: 0 }}>Loading transcript…</p>}
+
+        {!loading && !detail && (
+          <p style={{ color: '#8A8A98', margin: 0 }}>Couldn't load this one — it may have been removed.</p>
+        )}
+
+        {!loading && detail && (
+          <>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.05em', textTransform: 'uppercase', color: '#8A8A98' }}>
+              {detail.kind === 'interview' ? 'Interview' : 'Debate'}
+            </div>
+            <h3 style={{ margin: '4px 0 8px', fontFamily: "'Playfair Display', Georgia, serif", fontSize: 21 }}>{detail.topic}</h3>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, fontSize: 12.5, color: '#4A4A5C', marginBottom: 16 }}>
+              {detail.side && <span>You: {detail.side === 'for' ? 'For' : 'Against'}</span>}
+              {persona && <span>{persona.icon} {persona.name}</span>}
+              {detail.aiModel && <span>{detail.aiModel}</span>}
+              {typeof detail.score?.overall === 'number' && <span>Score: {detail.score.overall}%</span>}
+            </div>
+
+            {detail.feedback?.summary && (
+              <div style={{ background: '#EEF0FF', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#3F36C9', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>AI feedback</div>
+                <p style={{ margin: 0, fontSize: 13.5, color: '#4A4A5C', lineHeight: 1.5 }}>{detail.feedback.summary}</p>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {detail.messages.length === 0 ? (
+                <p style={{ color: '#8A8A98', fontSize: 13 }}>No transcript was saved for this session.</p>
+              ) : (
+                detail.messages.map((m) => (
+                  <div key={m.id} style={{ display: 'flex', justifyContent: m.sender === 'user' ? 'flex-end' : 'flex-start' }}>
+                    <div style={{ maxWidth: '85%', padding: '10px 13px', borderRadius: 10, fontSize: 14, lineHeight: 1.5, background: m.sender === 'user' ? '#E9F7F3' : '#EEF0FF', color: m.sender === 'user' ? '#0D3D38' : '#221E5C' }}>
+                      {m.text}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -111,6 +162,20 @@ function UnlockedView() {
   const { user, signOutUser } = useAuth();
   const { history, totalDebates, loading } = useDebateHistory();
   const [filter, setFilter] = useState('all');
+  const [detail, setDetail] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+
+  const openDetail = async (id) => {
+    setDetailLoading(true);
+    setDetail(null);
+    const d = await loadSessionDetail(id);
+    setDetail(d);
+    setDetailLoading(false);
+  };
+  const closeDetail = () => {
+    setDetail(null);
+    setDetailLoading(false);
+  };
 
   const filtered =
     filter === 'all'
@@ -121,6 +186,10 @@ function UnlockedView() {
 
   return (
     <div className="history-unlocked">
+      {(detail || detailLoading) && (
+        <HistoryDetailModal detail={detail} loading={detailLoading} onClose={closeDetail} />
+      )}
+
       <div className="history-header">
         <div className="history-user">
           <div className="history-avatar">
@@ -135,13 +204,13 @@ function UnlockedView() {
             <div className="history-useremail">{user.email}</div>
           </div>
         </div>
-        <button type="button" className="history-signout-btn" onClick={signOutUser}>
-          Sign out
-        </button>
+        <button type="button" className="history-signout-btn" onClick={signOutUser}>Sign out</button>
       </div>
 
       {loading ? (
-        <div className="history-empty"><p className="history-empty-text">Loading your history…</p></div>
+        <div className="history-empty">
+          <p className="history-empty-text">Loading your history…</p>
+        </div>
       ) : totalDebates === 0 ? (
         <div className="history-empty">
           <p className="history-empty-text">Nothing saved yet. Finish a debate or an interview and it'll show up here.</p>
@@ -150,28 +219,10 @@ function UnlockedView() {
       ) : (
         <>
           <div className="history-filter-tabs">
-            <button
-              type="button"
-              className={`history-filter-tab ${filter === 'all' ? 'is-active' : ''}`}
-              onClick={() => setFilter('all')}
-            >
-              All
-            </button>
-            <button
-              type="button"
-              className={`history-filter-tab ${filter === 'debate' ? 'is-active' : ''}`}
-              onClick={() => setFilter('debate')}
-            >
-              Debates
-            </button>
+            <button type="button" className={`history-filter-tab ${filter === 'all' ? 'is-active' : ''}`} onClick={() => setFilter('all')}>All</button>
+            <button type="button" className={`history-filter-tab ${filter === 'debate' ? 'is-active' : ''}`} onClick={() => setFilter('debate')}>Debates</button>
             {hasInterviews && (
-              <button
-                type="button"
-                className={`history-filter-tab ${filter === 'interview' ? 'is-active' : ''}`}
-                onClick={() => setFilter('interview')}
-              >
-                Interviews
-              </button>
+              <button type="button" className={`history-filter-tab ${filter === 'interview' ? 'is-active' : ''}`} onClick={() => setFilter('interview')}>Interviews</button>
             )}
           </div>
 
@@ -180,21 +231,25 @@ function UnlockedView() {
               const isInterview = entry.kind === 'interview';
               const persona = PERSONALITIES.find((p) => p.id === entry.personality);
               const tone = scoreTone(entry.score?.overall || 0);
-              // Interview entries carry `category` + `company` instead of a
-              // debate personality; render whichever shape the entry has.
               const metaParts = isInterview
                 ? [formatRelativeDate(entry.completedAt), entry.category, entry.company]
                 : [formatRelativeDate(entry.completedAt), persona ? `${persona.icon} ${persona.name}` : null, entry.aiModel];
               return (
-                <div className="history-row" key={entry.id}>
+                <div
+                  className="history-row"
+                  key={entry.id}
+                  role="button"
+                  tabIndex={0}
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => openDetail(entry.id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') openDetail(entry.id); }}
+                >
                   <div className="history-row-icon" aria-hidden="true">
                     {isInterview ? <BriefcaseIcon /> : <ChatIcon />}
                   </div>
                   <div className="history-row-main">
                     <span className="history-row-topic">{entry.topic}</span>
-                    <span className="history-row-meta">
-                      {metaParts.filter(Boolean).join(' \u00b7 ')}
-                    </span>
+                    <span className="history-row-meta">{metaParts.filter(Boolean).join(' · ')}</span>
                   </div>
                   <span className={`history-row-score tone-${tone}`}>{entry.score?.overall || 0}%</span>
                 </div>
@@ -213,7 +268,7 @@ export default function History() {
   if (loading) {
     return (
       <main className="history-page">
-        <div className="container history-loading">Checking your session\u2026</div>
+        <div className="container history-loading">Checking your session…</div>
       </main>
     );
   }

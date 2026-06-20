@@ -150,7 +150,7 @@ export async function persistTurns(sessionId, messages) {
       messages.map((m) => ({ sender: m.sender, content: m.text })),
     );
   } catch {
-    /* non-fatal — completion will re-send the authoritative transcript */
+    /* non-fatal â€” completion will re-send the authoritative transcript */
   }
 }
 
@@ -180,6 +180,51 @@ export async function loadSessionForResume(sessionId) {
         sender: m.sender,
         text: m.content,
       })),
+    };
+  } catch {
+    return null;
+  }
+}
+
+// Loads one session's full detail (transcript + scores + AI feedback) for
+// the History detail modal. Returns a normalized shape, or null.
+export async function loadSessionDetail(sessionId) {
+  if (!sessionId || !backendUsable()) return null;
+  try {
+    const s = await api.getSession(sessionId);
+    if (!s) return null;
+    const toList = (v) => {
+      if (Array.isArray(v)) return v;
+      if (typeof v === 'string') {
+        try { return JSON.parse(v); } catch { return []; }
+      }
+      return [];
+    };
+    return {
+      id: s.id,
+      kind: s.kind,
+      status: s.status,
+      topic: s.topic,
+      side: s.side,
+      personality: s.personality,
+      aiModel: s.ai_model,
+      category: s.category,
+      company: s.company,
+      completedAt: s.completed_at || s.created_at,
+      score: {
+        overall: s.score_overall,
+        logic: s.score_logic,
+        evidence: s.score_evidence,
+        clarity: s.score_clarity,
+        persuasiveness: s.score_persuasiveness,
+        source: s.score_source,
+      },
+      feedback: {
+        summary: s.feedback_summary || '',
+        strengths: toList(s.feedback_strengths),
+        improvements: toList(s.feedback_improvements),
+      },
+      messages: (s.messages || []).map((m, i) => ({ id: `h-${i}`, sender: m.sender, text: m.content })),
     };
   } catch {
     return null;
