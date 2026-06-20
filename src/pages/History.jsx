@@ -109,7 +109,7 @@ function LockedView() {
 
 function UnlockedView() {
   const { user, signOutUser } = useAuth();
-  const { history, totalDebates } = useDebateHistory();
+  const { history, totalDebates, loading } = useDebateHistory();
   const [filter, setFilter] = useState('all');
 
   const filtered =
@@ -140,7 +140,9 @@ function UnlockedView() {
         </button>
       </div>
 
-      {totalDebates === 0 ? (
+      {loading ? (
+        <div className="history-empty"><p className="history-empty-text">Loading your history…</p></div>
+      ) : totalDebates === 0 ? (
         <div className="history-empty">
           <p className="history-empty-text">Nothing saved yet. Finish a debate or an interview and it'll show up here.</p>
           <a href="/debate" className="history-empty-cta">Start a debate</a>

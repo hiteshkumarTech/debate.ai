@@ -1,33 +1,66 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { loadHistory } from '../services/sessionService';
 import {
-  getDebateHistory,
   computeStreak,
   computeAverageScore,
   computeTopicExtremes,
   computeWeeklyAverages,
 } from '../utils/debateHistory';
 
+// Loads debate/interview history from the backend when the user is signed
+// in (and the backend is configured), otherwise from localStorage. Both
+// sources are normalized to the same entry shape by sessionService, so the
+// derived-stat helpers below work identically regardless of source.
 export function useDebateHistory() {
-  const [history, setHistory] = useState(() => getDebateHistory());
+  const { user } = useAuth();
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Re-read from storage if another tab/window writes to it (e.g. the
-  // user has the Debate page and Progress page open side by side).
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { entries } = await loadHistory();
+      setHistory(Array.isArray(entries) ? entries : []);
+    } catch {
+      setHistory([]);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Reload whenever auth state changes -- signing in/out switches the
+  // source between backend and local storage.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      try {
+        const { entries } = await loadHistory();
+        if (!cancelled) setHistory(Array.isArray(entries) ? entries : []);
+      } catch {
+        if (!cancelled) setHistory([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user]);
+
+  // Cross-tab sync for the local-storage fallback path.
   useEffect(() => {
     const handleStorage = (e) => {
-      if (e.key === 'debateai_history_v1') {
-        setHistory(getDebateHistory());
-      }
+      if (e.key === 'debateai_history_v1') refresh();
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
-  }, []);
-
-  const refresh = useCallback(() => {
-    setHistory(getDebateHistory());
-  }, []);
+  }, [refresh]);
 
   return {
     history,
+    loading,
     refresh,
     streak: computeStreak(history),
     averageScore: computeAverageScore(history),
