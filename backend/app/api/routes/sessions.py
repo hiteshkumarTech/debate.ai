@@ -1,5 +1,5 @@
 """
-/api/sessions — create, list, fetch, resume, and complete debate/interview
+/api/sessions â€” create, list, fetch, resume, and complete debate/interview
 sessions. This is what turns History, Progress, transcript storage, and
 Resume Session from localStorage placeholders into real server-backed
 features.
@@ -114,14 +114,14 @@ def append_messages(
     if s.status != "active":
         raise HTTPException(status.HTTP_409_CONFLICT, "Session is not active.")
 
-    existing = db.query(Message).filter(Message.session_id == s.id).count()
+    db.query(Message).filter(Message.session_id == s.id).delete()
     for i, m in enumerate(body.messages):
         db.add(
             Message(
                 session_id=s.id,
                 sender=m.sender,
                 content=m.content,
-                turn_index=existing + i,
+                turn_index=i,
             )
         )
     db.commit()

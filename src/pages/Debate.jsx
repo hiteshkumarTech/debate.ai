@@ -3,41 +3,60 @@ import { useSearchParams } from 'react-router-dom';
 import DebateSetup from '../components/DebateSetup';
 import DebateChat from '../components/DebateChat';
 import DebateReport from '../components/DebateReport';
-import { loadSessionForResume } from '../services/sessionService';
+import { loadSessionForResume, loadLatestActiveSession, discardSession } from '../services/sessionService';
 import './Debate.css';
 
+const resumeBannerStyle = {
+  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+  gap: 16, flexWrap: 'wrap', padding: '12px 16px', marginBottom: 20,
+  borderRadius: 10, border: '1.5px solid rgba(79,70,229,0.35)', background: '#EEF0FF',
+};
+const resumeBtnStyle = {
+  padding: '8px 16px', borderRadius: 999, border: 'none',
+  background: '#1A1A2E', color: '#FAF9F6', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+};
+const discardBtnStyle = {
+  padding: '8px 16px', borderRadius: 999, border: '1.5px solid rgba(26,26,46,0.18)',
+  background: 'transparent', color: '#1A1A2E', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+};
+
 export default function Debate() {
-  // 'setup' | 'chat' | 'report'
   const [stage, setStage] = useState('setup');
   const [debateConfig, setDebateConfig] = useState(null);
   const [finishedMessages, setFinishedMessages] = useState([]);
-  // The backend session id for the current debate (for completing the right
-  // session and avoiding duplicates).
   const [sessionId, setSessionId] = useState(null);
-  // When resuming, the loaded session (id + transcript) passed to DebateChat.
   const [resumeSession, setResumeSession] = useState(null);
+  // A still-active debate found on mount, offered via the resume banner.
+  const [resumable, setResumable] = useState(null);
 
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // If the URL has ?resume=<id>, load that unfinished session and jump
-  // straight into the chat with its transcript rehydrated.
+  // On mount: resume a specific session from ?resume=<id>, OR detect the
+  // user's latest unfinished debate and offer to resume it -- so navigating
+  // away from an in-progress debate and back doesn't lose it.
   useEffect(() => {
-    const resumeId = searchParams.get('resume');
-    if (!resumeId) return;
     let cancelled = false;
+    const resumeId = searchParams.get('resume');
+
     (async () => {
-      const loaded = await loadSessionForResume(resumeId);
-      if (cancelled) return;
-      if (loaded) {
-        setDebateConfig(loaded.config);
-        setResumeSession(loaded);
-        setSessionId(loaded.id);
-        setStage('chat');
+      if (resumeId) {
+        const loaded = await loadSessionForResume(resumeId);
+        if (cancelled) return;
+        if (loaded) {
+          setDebateConfig(loaded.config);
+          setResumeSession(loaded);
+          setSessionId(loaded.id);
+          setStage('chat');
+        }
+        setSearchParams({}, { replace: true });
+        return;
       }
-      // Clear the param either way so a refresh doesn't re-trigger a load
-      // (and a stale/invalid id just falls back to the setup screen).
-      setSearchParams({}, { replace: true });
+      const latest = await loadLatestActiveSession('debate');
+      if (!cancelled && latest && (latest.messages?.length || 0) > 1) {
+        setResumable(latest);
+      }
     })();
+
     return () => {
       cancelled = true;
     };
@@ -45,10 +64,29 @@ export default function Debate() {
   }, []);
 
   const handleStart = (config) => {
+    // Starting a brand-new debate: drop any unfinished one we were offering.
+    if (resumable) {
+      discardSession(resumable.id);
+      setResumable(null);
+    }
     setDebateConfig(config);
     setResumeSession(null);
     setSessionId(null);
     setStage('chat');
+  };
+
+  const handleResumeActive = () => {
+    if (!resumable) return;
+    setDebateConfig(resumable.config);
+    setResumeSession(resumable);
+    setSessionId(resumable.id);
+    setResumable(null);
+    setStage('chat');
+  };
+
+  const handleDiscardActive = () => {
+    if (resumable) discardSession(resumable.id);
+    setResumable(null);
   };
 
   const handleEndDebate = (messages, id) => {
@@ -60,7 +98,7 @@ export default function Debate() {
   const handleRetrySameTopic = () => {
     setFinishedMessages([]);
     setResumeSession(null);
-    setSessionId(null); // a retry is a fresh session
+    setSessionId(null);
     setStage('chat');
   };
 
@@ -75,7 +113,25 @@ export default function Debate() {
   return (
     <main className="debate-page">
       <div className="container">
-        {stage === 'setup' && <DebateSetup onStart={handleStart} />}
+        {stage === 'setup' && (
+          <>
+            {resumable && (
+              <div style={resumeBannerStyle}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <strong style={{ fontSize: 14 }}>You have an unfinished debate</strong>
+                  <span style={{ fontSize: 13, color: '#4A4A5C' }}>
+                    “{resumable.config.topic}” — pick up where you left off?
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+                  <button type="button" style={resumeBtnStyle} onClick={handleResumeActive}>Resume</button>
+                  <button type="button" style={discardBtnStyle} onClick={handleDiscardActive}>Start fresh</button>
+                </div>
+              </div>
+            )}
+            <DebateSetup onStart={handleStart} />
+          </>
+        )}
 
         {stage === 'chat' && (
           <DebateChat

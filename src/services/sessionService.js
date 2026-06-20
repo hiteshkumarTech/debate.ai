@@ -150,7 +150,7 @@ export async function persistTurns(sessionId, messages) {
       messages.map((m) => ({ sender: m.sender, content: m.text })),
     );
   } catch {
-    /* non-fatal â€” completion will re-send the authoritative transcript */
+    /* non-fatal Ã¢â‚¬â€ completion will re-send the authoritative transcript */
   }
 }
 
@@ -228,5 +228,30 @@ export async function loadSessionDetail(sessionId) {
     };
   } catch {
     return null;
+  }
+}
+
+// Returns the most recent still-active session of the given kind (with its
+// transcript) so the page can offer to resume it after navigating away.
+export async function loadLatestActiveSession(kind = 'debate') {
+  if (!backendUsable()) return null;
+  try {
+    const active = await api.listActiveSessions();
+    const match = (active || []).find((s) => s.kind === kind);
+    if (!match) return null;
+    return await loadSessionForResume(match.id);
+  } catch {
+    return null;
+  }
+}
+
+// Permanently drops an unfinished session (when the user chooses to start
+// fresh instead of resuming). Best-effort; never throws.
+export async function discardSession(sessionId) {
+  if (!sessionId || !backendUsable()) return;
+  try {
+    await api.deleteSession(sessionId);
+  } catch {
+    /* non-fatal */
   }
 }
