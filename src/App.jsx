@@ -11,6 +11,7 @@ import History from './pages/History';
 import Interview from './pages/Interview';
 import Leaderboard from './pages/Leaderboard';
 import About from './pages/About';
+import HowItWorks from './pages/HowItWorks';
 import Personas from './pages/Personas';
 import Achievements from './pages/Achievements';
 
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/personas" element={<Personas />} />
           <Route path="/achievements" element={<Achievements />} />
           <Route path="/about" element={<About />} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
         </Routes>
         <Footer />
         <FloatingSignIn />

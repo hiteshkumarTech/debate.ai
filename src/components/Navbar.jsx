@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -15,7 +16,19 @@ const LINKS = [
 
 export default function Navbar() {
   const { pathname } = useLocation();
-  const { user, loading } = useAuth();
+  const { user, loading, signInWithGoogle } = useAuth();
+  const [busy, setBusy] = useState(false);
+
+  const handleSignUp = async () => {
+    setBusy(true);
+    try {
+      await signInWithGoogle();
+    } catch {
+      // popup closed/blocked etc. - the floating button surfaces detailed errors
+    } finally {
+      setBusy(false);
+    }
+  };
 
   return (
     <header className="navbar">
@@ -38,9 +51,15 @@ export default function Navbar() {
         </nav>
 
         {!loading && !user && (
-          <Link to="/signup" className="navbar-signup">
-            Sign up free
-          </Link>
+          <button
+            type="button"
+            className="navbar-signup"
+            onClick={handleSignUp}
+            disabled={busy}
+            style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            {busy ? 'Signing in…' : 'Sign up free'}
+          </button>
         )}
       </div>
     </header>
