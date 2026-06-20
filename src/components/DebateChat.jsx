@@ -1,13 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { useVoiceAssistant } from '../hooks/useVoiceAssistant';
 import { LANGUAGES, PERSONALITIES } from '../data/personalities';
-import { api } from '../services/api';
+import { api, ApiError } from '../services/api';
 import { startSession, persistTurns } from '../services/sessionService';
 import './DebateChat.css';
 
-// Placeholder reply generator — swap this for a real call to your FastAPI
-// backend's POST /api/debate/message endpoint once it's built. Keeping the
-// shape identical (returns a string) means this component doesn't change.
+// LOCAL-DEV ONLY placeholder. Used *only* when no backend is configured at
+// all (VITE_API_URL unset) so the UI is still demoable offline. In
+// production the real backend is always called, and on failure we now
+// surface the actual error instead of faking a reply.
 function generateMockReply(userMessage, { side, personality }) {
   const opposite = side === 'for' ? 'against' : 'for';
   const intensity = {
@@ -17,7 +18,27 @@ function generateMockReply(userMessage, { side, personality }) {
     'job-interviewer': 'Interesting point — walk me through how you\'d defend that under pressure.',
   };
   const fallback = intensity[personality] || intensity['strict-professor'];
-  return `${fallback} I'm arguing ${opposite} this topic, and "${userMessage.slice(0, 60)}${userMessage.length > 60 ? '…' : ''}" doesn't address the core counter-evidence yet.`;
+  return `[local placeholder — no backend configured] ${fallback} I'm arguing ${opposite} this topic, and "${userMessage.slice(0, 60)}${userMessage.length > 60 ? '…' : ''}" doesn't address the core counter-evidence yet.`;
+}
+
+// Turn a backend/network failure into a clear, human message shown in the
+// chat — never a fake AI reply. This fixes the bug where a 401 (not signed
+// in) was silently swallowed and replaced with a canned line.
+function describeApiError(err) {
+  const status = err instanceof ApiError ? err.status : undefined;
+  if (status === 401 || status === 403) {
+    return 'You need to be signed in to debate with the AI. Please log in, then send your message again.';
+  }
+  if (status === 0) {
+    return "Couldn't reach the server — it may be waking up (the free backend sleeps after a few minutes idle). Wait ~30 seconds and send your message again.";
+  }
+  if (status === 429) {
+    return 'The AI is being rate-limited right now. Wait a few seconds, then try again.';
+  }
+  if (status === 502 || status === 503) {
+    return `The AI provider had a problem: ${err.message}. Please try again in a moment.`;
+  }
+  return `Couldn't get a reply: ${err?.message || 'unknown error'}. Please try again.`;
 }
 
 export default function DebateChat({ config, onEndDebate, initialSession = null }) {
@@ -25,8 +46,6 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
   const personaInfo = PERSONALITIES.find((p) => p.id === personality);
 
   const [language, setLanguage] = useState('en-US');
-  // When resuming, seed the chat with the stored transcript; otherwise start
-  // with the AI's opening line.
   const [messages, setMessages] = useState(() => {
     if (initialSession?.messages?.length) return initialSession.messages;
     return [
@@ -38,19 +57,16 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
     ];
   });
   const [draft, setDraft] = useState('');
+  const [isThinking, setIsThinking] = useState(false);
+  const [apiError, setApiError] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // Tracks the backend session id for this debate (for persisting turns).
-  // Reuses the resumed session's id, or gets created on mount for a new one.
   const sessionIdRef = useRef(initialSession?.id || null);
 
   const voice = useVoiceAssistant({ language });
 
-  // For a brand-new debate (not a resume), create an active backend session
-  // once on mount so turns can be persisted and it can be resumed later.
-  // No-ops without a backend — the chat still works purely in local state.
   useEffect(() => {
-    if (initialSession?.id) return; // already have a session (resumed)
+    if (initialSession?.id) return;
     let cancelled = false;
     (async () => {
       const id = await startSession({
@@ -70,55 +86,54 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isThinking]);
 
   const sendMessage = async (text) => {
     const trimmed = text.trim();
-    if (!trimmed) return;
+    if (!trimmed || isThinking) return;
 
     const userMsg = { id: `u-${Date.now()}`, sender: 'user', text: trimmed };
-    // Capture the history to send to the backend (includes this new turn).
     const historyForApi = [...messages, userMsg].map((m) => ({
       sender: m.sender,
       content: m.text,
     }));
     setMessages((prev) => [...prev, userMsg]);
     setDraft('');
+    setApiError(null);
 
-    // Try the real backend first; fall back to the local mock if the
-    // backend isn't configured/reachable, so the chat always responds.
-    let reply;
-    if (api.isConfigured()) {
-      try {
-        const res = await api.aiReply({
-          kind: 'debate',
-          topic,
-          history: historyForApi,
-          ai_model: aiModel,
-          side,
-          personality,
-          custom_persona_instruction: customPersonaInstruction || null,
-        });
-        reply = res.reply;
-      } catch {
-        reply = generateMockReply(trimmed, { side, personality });
-      }
-    } else {
-      // Small delay so the local mock still feels like a reply, not instant.
-      await new Promise((r) => setTimeout(r, 500));
-      reply = generateMockReply(trimmed, { side, personality });
+    const appendReply = (reply) => {
+      const aiMsg = { id: `a-${Date.now()}`, sender: 'ai', text: reply };
+      setMessages((prev) => {
+        const updated = [...prev, aiMsg];
+        persistTurns(sessionIdRef.current, updated);
+        return updated;
+      });
+      voice.speak(reply);
+    };
+
+    if (!api.isConfigured()) {
+      await new Promise((r) => setTimeout(r, 400));
+      appendReply(generateMockReply(trimmed, { side, personality }));
+      return;
     }
 
-    const aiMsg = { id: `a-${Date.now()}`, sender: 'ai', text: reply };
-    setMessages((prev) => {
-      const updated = [...prev, aiMsg];
-      // Persist the conversation so far (fire-and-forget) so this session
-      // can be resumed later with its transcript intact. No-op without a
-      // backend session.
-      persistTurns(sessionIdRef.current, updated);
-      return updated;
-    });
-    voice.speak(reply);
+    setIsThinking(true);
+    try {
+      const res = await api.aiReply({
+        kind: 'debate',
+        topic,
+        history: historyForApi,
+        ai_model: aiModel,
+        side,
+        personality,
+        custom_persona_instruction: customPersonaInstruction || null,
+      });
+      appendReply(res.reply);
+    } catch (err) {
+      setApiError(describeApiError(err));
+    } finally {
+      setIsThinking(false);
+    }
   };
 
   const handleMicToggle = () => {
@@ -167,6 +182,14 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
             </div>
           </div>
         ))}
+
+        {isThinking && (
+          <div className="dchat-row">
+            <div className="dchat-avatar">AI</div>
+            <div className="dchat-bubble dchat-thinking">Thinking…</div>
+          </div>
+        )}
+
         <div ref={messagesEndRef} />
       </div>
 
@@ -196,7 +219,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
             type="button"
             className={`dchat-mic-btn ${voice.isListening ? 'is-listening' : ''}`}
             onClick={handleMicToggle}
-            disabled={!voice.isRecognitionSupported}
+            disabled={!voice.isRecognitionSupported || isThinking}
             aria-label={voice.isListening ? 'Stop listening' : 'Start voice input'}
             title={voice.isRecognitionSupported ? 'Speak your argument' : 'Voice input not supported in this browser'}
           >
@@ -209,7 +232,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
             placeholder={voice.isListening ? 'Listening… speak now' : 'Type your argument, or press the mic to speak'}
             value={voice.isListening ? voice.transcript : draft}
             onChange={(e) => setDraft(e.target.value)}
-            disabled={voice.isListening}
+            disabled={voice.isListening || isThinking}
           />
 
           <button
@@ -223,7 +246,9 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
             {voice.speakerOn ? <SpeakerWaveIcon /> : <SpeakerMuteIcon />}
           </button>
 
-          <button type="submit" className="dchat-send-btn">Send</button>
+          <button type="submit" className="dchat-send-btn" disabled={isThinking}>
+            {isThinking ? 'Thinking…' : 'Send'}
+          </button>
         </form>
 
         {voice.recognitionError && (
@@ -232,6 +257,10 @@ export default function DebateChat({ config, onEndDebate, initialSession = null 
               ? 'Microphone access was blocked. Allow it in your browser settings to use voice input.'
               : 'Voice input had a problem — try again or type your argument.'}
           </p>
+        )}
+
+        {apiError && (
+          <p className="dchat-error-note">{apiError}</p>
         )}
       </div>
     </div>
