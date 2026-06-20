@@ -1,9 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 
-// Web Speech API is prefixed in some browsers and entirely absent in others
-// (notably Firefox has no SpeechRecognition support as of this writing).
-// Every consumer of this hook must check `isRecognitionSupported` /
-// `isSynthesisSupported` before relying on mic or speaker behavior.
 const SpeechRecognitionImpl =
   typeof window !== 'undefined'
     ? window.SpeechRecognition || window.webkitSpeechRecognition
@@ -11,12 +7,35 @@ const SpeechRecognitionImpl =
 
 const speechSynthesisImpl = typeof window !== 'undefined' ? window.speechSynthesis : null;
 
+// Best-effort gender heuristics by voice name (the Web Speech API doesn't
+// expose gender). Voices vary by OS/browser, so we match common names and
+// fall back gracefully.
+const FEMALE_HINT = /female|samantha|victoria|karen|moira|tessa|fiona|zira|susan|allison|ava|serena|aria|jenny|sonia|libby|michelle|catherine|hazel|linda|heera|kalpana|swara|salli|joanna|kimberly|amy|emma|google us english/i;
+const MALE_HINT = /\bmale\b|daniel|alex|fred|thomas|oliver|david|mark|george|rishi|guy|davis|tony|ryan|matthew|brian|arthur|hemant|google uk english male/i;
+
+function pickVoice(voices, lang, gender) {
+  if (!voices || voices.length === 0) return null;
+  const base = (lang || 'en').split('-')[0].toLowerCase();
+  const langVoices = voices.filter((v) => v.lang && v.lang.toLowerCase().startsWith(base));
+  const pool = langVoices.length ? langVoices : voices;
+  const wanted = gender === 'male' ? MALE_HINT : FEMALE_HINT;
+  const avoid = gender === 'male' ? FEMALE_HINT : MALE_HINT;
+  return (
+    pool.find((v) => wanted.test(v.name)) ||
+    pool.find((v) => !avoid.test(v.name)) ||
+    pool[0] ||
+    null
+  );
+}
+
 export function useVoiceAssistant({ language = 'en-US' } = {}) {
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [speakerOn, setSpeakerOn] = useState(true);
   const [transcript, setTranscript] = useState('');
   const [recognitionError, setRecognitionError] = useState(null);
+  const [voices, setVoices] = useState([]);
+  const [voiceGender, setVoiceGender] = useState('female');
 
   const recognitionRef = useRef(null);
   const onResultCallbackRef = useRef(null);
@@ -24,8 +43,15 @@ export function useVoiceAssistant({ language = 'en-US' } = {}) {
   const isRecognitionSupported = Boolean(SpeechRecognitionImpl);
   const isSynthesisSupported = Boolean(speechSynthesisImpl);
 
-  // Recreate the recognizer whenever language changes — SpeechRecognition
-  // instances don't support changing `.lang` mid-session reliably.
+  // Synthesis voices populate asynchronously in most browsers.
+  useEffect(() => {
+    if (!isSynthesisSupported) return;
+    const load = () => setVoices(speechSynthesisImpl.getVoices() || []);
+    load();
+    speechSynthesisImpl.addEventListener?.('voiceschanged', load);
+    return () => speechSynthesisImpl.removeEventListener?.('voiceschanged', load);
+  }, [isSynthesisSupported]);
+
   useEffect(() => {
     if (!isRecognitionSupported) return;
 
@@ -45,7 +71,6 @@ export function useVoiceAssistant({ language = 'en-US' } = {}) {
     };
 
     recognition.onerror = (event) => {
-      // Common codes: 'no-speech', 'audio-capture', 'not-allowed', 'network'
       setRecognitionError(event.error);
       setIsListening(false);
     };
@@ -63,7 +88,7 @@ export function useVoiceAssistant({ language = 'en-US' } = {}) {
       try {
         recognition.abort();
       } catch {
-        // abort() throws if recognition never started — safe to ignore.
+        // abort() throws if recognition never started - safe to ignore.
       }
     };
   }, [language, isRecognitionSupported]);
@@ -77,8 +102,7 @@ export function useVoiceAssistant({ language = 'en-US' } = {}) {
       recognitionRef.current.start();
       setIsListening(true);
     } catch {
-      // start() throws if recognition is already running — ignore, state
-      // will self-correct via onend.
+      // start() throws if recognition is already running - ignore.
     }
   }, []);
 
@@ -95,12 +119,14 @@ export function useVoiceAssistant({ language = 'en-US' } = {}) {
       const utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = language;
       utterance.rate = 1;
+      const chosen = pickVoice(voices, language, voiceGender);
+      if (chosen) utterance.voice = chosen;
       utterance.onstart = () => setIsSpeaking(true);
       utterance.onend = () => setIsSpeaking(false);
       utterance.onerror = () => setIsSpeaking(false);
       speechSynthesisImpl.speak(utterance);
     },
-    [language, speakerOn, isSynthesisSupported]
+    [language, speakerOn, isSynthesisSupported, voices, voiceGender]
   );
 
   const stopSpeaking = useCallback(() => {
@@ -124,6 +150,8 @@ export function useVoiceAssistant({ language = 'en-US' } = {}) {
     recognitionError,
     isRecognitionSupported,
     isSynthesisSupported,
+    voiceGender,
+    setVoiceGender,
     startListening,
     stopListening,
     speak,

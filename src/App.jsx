@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import FloatingSignIn from './components/FloatingSignIn';
+import MobileNotice from './components/MobileNotice';
 import Landing from './pages/Landing';
 import Dashboard from './pages/Dashboard';
 import Debate from './pages/Debate';
@@ -47,6 +48,7 @@ export default function App() {
         </Routes>
         <Footer />
         <FloatingSignIn />
+        <MobileNotice />
       </BrowserRouter>
     </AuthProvider>
   );
