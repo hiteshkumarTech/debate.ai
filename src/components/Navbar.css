@@ -2,7 +2,7 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  background: rgba(250, 249, 246, 0.88);
+  background: var(--nav-bg);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
@@ -115,3 +115,14 @@
   .navbar-burger { display: flex; }
   .navbar-overlay { display: block; }
 }
+
+/* Theme toggle */
+.navbar-toggle {
+  width: 40px; height: 40px; border-radius: var(--radius-md);
+  display: inline-flex; align-items: center; justify-content: center;
+  background: none; border: 1px solid var(--line); color: var(--ink-soft);
+  cursor: pointer; flex-shrink: 0;
+  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+.navbar-toggle:hover { color: var(--ink); border-color: var(--line-strong); background: var(--paper-sunken); }
+@media (max-width: 768px) { .navbar-toggle { width: 44px; height: 44px; } }

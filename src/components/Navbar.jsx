@@ -2,6 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import './Navbar.css';
 
 const LINKS = [
@@ -16,16 +17,33 @@ const LINKS = [
   { label: 'About', to: '/about' },
 ];
 
+function ThemeToggle() {
+  const { theme, toggleTheme } = useTheme();
+  return (
+    <button
+      type="button"
+      className="navbar-toggle"
+      onClick={toggleTheme}
+      aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+    >
+      {theme === 'dark' ? (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" /></svg>
+      ) : (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z" /></svg>
+      )}
+    </button>
+  );
+}
+
 export default function Navbar() {
   const { pathname } = useLocation();
   const { user, loading, signInWithGoogle } = useAuth();
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState(false);
 
-  // Close the drawer whenever the route changes.
   useEffect(() => { setOpen(false); }, [pathname]);
 
-  // While the drawer is open: lock page scroll and allow Escape to close.
   useEffect(() => {
     if (!open) return undefined;
     const prevOverflow = document.body.style.overflow;
@@ -49,9 +67,6 @@ export default function Navbar() {
     }
   };
 
-  // Overlay + drawer are portaled to <body> so their position:fixed is relative
-  // to the viewport, not the .navbar header (whose backdrop-filter would otherwise
-  // trap them in the top strip).
   const drawer = createPortal(
     <>
       <div
@@ -125,6 +140,7 @@ export default function Navbar() {
           </nav>
 
           <div className="navbar-actions">
+            <ThemeToggle />
             {!loading && !user && (
               <button type="button" className="navbar-signup" onClick={handleSignUp} disabled={busy}>
                 {busy ? 'Signing in\u2026' : 'Sign up free'}

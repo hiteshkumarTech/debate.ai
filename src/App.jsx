@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -17,25 +18,25 @@ import HowItWorks from './pages/HowItWorks';
 import Personas from './pages/Personas';
 import Achievements from './pages/Achievements';
 
-// The "/" route is the entry point. Per the product brief, signed-in users
-// land on their Dashboard; signed-out visitors see the marketing Landing
-// page. While auth is still resolving we render nothing to avoid flashing
-// the wrong one for a moment.
 function Home() {
   const { user, loading } = useAuth();
   if (loading) return null;
   return user ? <Dashboard /> : <Landing />;
 }
 
-export default function App() {
+function AnimatedRoutes() {
+  const location = useLocation();
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Navbar />
-        <Routes>
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <Routes location={location}>
           <Route path="/" element={<Home />} />
-          {/* Direct, always-available dashboard route (also reachable
-              for signed-out users, which simply shows its empty state). */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/debate" element={<Debate />} />
           <Route path="/interview" element={<Interview />} />
@@ -48,6 +49,17 @@ export default function App() {
           <Route path="/explore" element={<Explore />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
         </Routes>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <Navbar />
+        <AnimatedRoutes />
         <Footer />
         <FloatingSignIn />
         <MobileNotice />
