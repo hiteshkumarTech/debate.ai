@@ -177,3 +177,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* cursor-glow positioning */
+.hero { position: relative; overflow: hidden; }
+.hero > .container,
+.hero > .hero-inner { position: relative; z-index: 1; }

@@ -1,0 +1,41 @@
+.cursor-glow {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;       /* clips the large glow to the hero box */
+  pointer-events: none;
+  z-index: 0;
+}
+
+.cursor-glow-layer {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+  /* GPU-only transform; --tx/--ty are written each frame by the rAF loop */
+  transform: translate3d(calc(-50% + var(--tx, 0px)), calc(-50% + var(--ty, 0px)), 0);
+  mix-blend-mode: screen;  /* luminous glow against the dark hero */
+}
+
+/* Layer 1 - bright, closely follows the cursor */
+.cursor-glow-layer-1 {
+  width: min(680px, 86vw);
+  height: min(680px, 86vw);
+  background: radial-gradient(circle at center,
+    rgba(251, 146, 60, 0.34) 0%,
+    rgba(251, 146, 60, 0.16) 28%,
+    rgba(251, 146, 60, 0) 68%);
+  filter: blur(18px);
+}
+
+/* Layer 2 - larger, softer, slower (parallax depth) */
+.cursor-glow-layer-2 {
+  width: min(1100px, 130vw);
+  height: min(1100px, 130vw);
+  background: radial-gradient(circle at center,
+    rgba(245, 158, 11, 0.20) 0%,
+    rgba(217, 119, 6, 0.10) 34%,
+    rgba(217, 119, 6, 0) 72%);
+  filter: blur(44px);
+}

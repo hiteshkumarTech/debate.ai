@@ -1,3 +1,4 @@
+import CursorGlow from '../components/CursorGlow';
 import { Link } from 'react-router-dom';
 import ArenaPreview from '../components/ArenaPreview';
 import AIModelSelector from '../components/AIModelSelector';
@@ -8,6 +9,7 @@ export default function Landing() {
     <main>
       {/* ===== Hero ===== */}
       <section className="hero">
+        <CursorGlow />
         <div className="container hero-inner">
           <div className="hero-copy">
             <span className="hero-eyebrow">Your personal AI debate &amp; communication coach</span>
@@ -40,7 +42,7 @@ export default function Landing() {
           <span className="section-eyebrow">Choose your opponent's mind</span>
           <h2 className="section-title">Practice against more than one kind of thinker</h2>
           <p className="section-sub">
-            Every model argues a little differently. Switch any time — your score is tracked
+            Every model argues a little differently. Switch any time â€” your score is tracked
             the same way no matter who's on the other side.
           </p>
           <div className="section-body">
@@ -58,7 +60,7 @@ export default function Landing() {
             {[
               { t: 'Debating skills', d: 'Structure an argument, anticipate rebuttals, hold your ground.' },
               { t: 'Communication', d: 'Say what you mean clearly, without losing the thread.' },
-              { t: 'Interview prep', d: 'Practice the questions that actually get asked — under pressure.' },
+              { t: 'Interview prep', d: 'Practice the questions that actually get asked â€” under pressure.' },
               { t: 'English speaking', d: 'Build fluency by speaking out loud, not just reading silently.' },
             ].map((g) => (
               <div className="goal-card" key={g.t}>
