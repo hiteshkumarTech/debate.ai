@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useAuth } from '../context/AuthContext';
 import './Navbar.css';
 
@@ -48,50 +49,16 @@ export default function Navbar() {
     }
   };
 
-  return (
-    <header className="navbar">
-      <div className="container navbar-inner">
-        <Link to="/" className="navbar-brand">
-          <span className="navbar-brand-mark" aria-hidden="true">D</span>
-          <span className="navbar-brand-name">DebateAI</span>
-        </Link>
-
-        <nav className="navbar-links" aria-label="Primary">
-          {LINKS.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              className={`navbar-link ${pathname === l.to ? 'is-active' : ''}`}
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="navbar-actions">
-          {!loading && !user && (
-            <button type="button" className="navbar-signup" onClick={handleSignUp} disabled={busy}>
-              {busy ? 'Signing in\u2026' : 'Sign up free'}
-            </button>
-          )}
-          <button
-            type="button"
-            className="navbar-burger"
-            aria-label="Open menu"
-            aria-expanded={open}
-            onClick={() => setOpen(true)}
-          >
-            <span /><span /><span />
-          </button>
-        </div>
-      </div>
-
+  // Overlay + drawer are portaled to <body> so their position:fixed is relative
+  // to the viewport, not the .navbar header (whose backdrop-filter would otherwise
+  // trap them in the top strip).
+  const drawer = createPortal(
+    <>
       <div
         className={`navbar-overlay ${open ? 'is-open' : ''}`}
         onClick={() => setOpen(false)}
         aria-hidden="true"
       />
-
       <aside className={`navbar-drawer ${open ? 'is-open' : ''}`} aria-hidden={!open}>
         <div className="navbar-drawer-head">
           <Link to="/" className="navbar-brand" onClick={() => setOpen(false)}>
@@ -132,6 +99,50 @@ export default function Navbar() {
           </button>
         )}
       </aside>
-    </header>
+    </>,
+    document.body
+  );
+
+  return (
+    <>
+      <header className="navbar">
+        <div className="container navbar-inner">
+          <Link to="/" className="navbar-brand">
+            <span className="navbar-brand-mark" aria-hidden="true">D</span>
+            <span className="navbar-brand-name">DebateAI</span>
+          </Link>
+
+          <nav className="navbar-links" aria-label="Primary">
+            {LINKS.map((l) => (
+              <Link
+                key={l.to}
+                to={l.to}
+                className={`navbar-link ${pathname === l.to ? 'is-active' : ''}`}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+
+          <div className="navbar-actions">
+            {!loading && !user && (
+              <button type="button" className="navbar-signup" onClick={handleSignUp} disabled={busy}>
+                {busy ? 'Signing in\u2026' : 'Sign up free'}
+              </button>
+            )}
+            <button
+              type="button"
+              className="navbar-burger"
+              aria-label="Open menu"
+              aria-expanded={open}
+              onClick={() => setOpen(true)}
+            >
+              <span /><span /><span />
+            </button>
+          </div>
+        </div>
+      </header>
+      {drawer}
+    </>
   );
 }
