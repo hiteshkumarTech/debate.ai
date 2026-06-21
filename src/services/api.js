@@ -2,7 +2,7 @@
 //
 // Design: every call attaches the current Firebase user's ID token as a
 // Bearer header (the backend verifies it). If VITE_API_URL isn't set, or
-// the backend is unreachable, callers fall back to local behavior — so the
+// the backend is unreachable, callers fall back to local behavior â€” so the
 // app keeps working offline/without a backend exactly as it did before.
 //
 // Configure by setting VITE_API_URL in the frontend .env, e.g.
@@ -54,7 +54,7 @@ async function request(path, { method = 'GET', body, signal } = {}) {
       signal,
     });
   } catch (networkErr) {
-    // Backend unreachable (down, CORS, offline) — surface as status 0 so
+    // Backend unreachable (down, CORS, offline) â€” surface as status 0 so
     // callers can fall back to local behavior cleanly.
     throw new ApiError(`Cannot reach backend: ${networkErr.message}`, 0);
   }
@@ -65,7 +65,7 @@ async function request(path, { method = 'GET', body, signal } = {}) {
       const data = await resp.json();
       if (data?.detail) detail = data.detail;
     } catch {
-      /* non-JSON error body — keep the generic message */
+      /* non-JSON error body â€” keep the generic message */
     }
     throw new ApiError(detail, resp.status);
   }
@@ -108,6 +108,21 @@ export const api = {
   createPersona: (payload) =>
     request('/api/personas', { method: 'POST', body: payload }),
   deletePersona: (id) => request(`/api/personas/${id}`, { method: 'DELETE' }),
+
+  // Public Explore gallery
+  publishDebate: (sessionId, category) =>
+    request('/api/public/debates', { method: 'POST', body: { session_id: sessionId, category } }),
+  unpublishDebate: (publicId) =>
+    request(`/api/public/debates/${publicId}`, { method: 'DELETE' }),
+  listPublicDebates: (params = {}) => {
+    const clean = Object.fromEntries(Object.entries(params).filter(([, v]) => v != null && v !== ''));
+    const qs = new URLSearchParams(clean).toString();
+    return request(`/api/public/debates${qs ? `?${qs}` : ''}`);
+  },
+  getPublicDebate: (publicId) => request(`/api/public/debates/${publicId}`),
+  addPublicView: (publicId) => request(`/api/public/debates/${publicId}/view`, { method: 'POST' }),
+  togglePublicLike: (publicId) => request(`/api/public/debates/${publicId}/like`, { method: 'POST' }),
+  myLikedDebates: () => request('/api/public/me/likes'),
 };
 
 export { ApiError };

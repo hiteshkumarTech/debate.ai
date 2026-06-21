@@ -6,6 +6,7 @@ import './Navbar.css';
 const LINKS = [
   { label: 'Dashboard', to: '/dashboard' },
   { label: 'Debate', to: '/debate' },
+  { label: 'Explore', to: '/explore' },
   { label: 'Interview', to: '/interview' },
   { label: 'Personas', to: '/personas' },
   { label: 'Leaderboard', to: '/leaderboard' },
@@ -58,7 +59,7 @@ export default function Navbar() {
             disabled={busy}
             style={{ border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
           >
-            {busy ? 'Signing in…' : 'Sign up free'}
+            {busy ? 'Signing inâ€¦' : 'Sign up free'}
           </button>
         )}
       </div>

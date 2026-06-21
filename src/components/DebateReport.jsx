@@ -2,8 +2,17 @@ import { useMemo, useRef, useEffect, useState } from 'react';
 import ScoreRing from './ScoreRing';
 import { scoreDebate, toTenScale } from '../utils/scoreDebate';
 import { saveCompletedDebate } from '../services/sessionService';
+import { api } from '../services/api';
+import { TOPIC_CATEGORIES, TOPICS } from '../data/topics';
 import { PERSONALITIES } from '../data/personalities';
 import './DebateReport.css';
+
+function categoryForTopic(topic) {
+  for (const cat of TOPIC_CATEGORIES) {
+    if ((TOPICS[cat.id] || []).some((t) => t.text === topic)) return cat.label;
+  }
+  return 'Other';
+}
 
 const METRIC_COPY = {
   logic: {
@@ -18,13 +27,13 @@ const METRIC_COPY = {
   },
   clarity: {
     label: 'Clarity',
-    low: 'Aim for fuller sentences — short replies read as unclear.',
+    low: 'Aim for fuller sentences â€” short replies read as unclear.',
     high: 'Your points came across clearly and were easy to follow.',
   },
   persuasiveness: {
     label: 'Persuasiveness',
     low: 'Anticipate the counter-argument before the AI raises it.',
-    high: 'Convincing delivery — this would land well with a real audience.',
+    high: 'Convincing delivery â€” this would land well with a real audience.',
   },
 };
 
@@ -45,16 +54,28 @@ export default function DebateReport({ config, messages, sessionId, onRetry, onN
 
   // Save exactly once per completed debate. The ref guard matters because
   // React (especially StrictMode in dev) can re-run effects more than
-  // once for the same mount — without the guard, "Try this topic again"
+  // once for the same mount â€” without the guard, "Try this topic again"
   // followed by ending that retry would risk a phantom double-save if
   // this component ever re-rendered before the effect's dependency
   // array changed.
   const [aiFeedback, setAiFeedback] = useState(null);
+  const [publishState, setPublishState] = useState('idle');
+
+  const handlePublish = async () => {
+    if (!sessionId) return;
+    setPublishState('publishing');
+    try {
+      await api.publishDebate(sessionId, categoryForTopic(topic));
+      setPublishState('done');
+    } catch (err) {
+      setPublishState(err?.status === 401 ? 'auth' : 'error');
+    }
+  };
 
   const hasSavedRef = useRef(false);
   useEffect(() => {
     if (hasSavedRef.current) return;
-    if (result.incomplete) return; // nothing to save — no arguments made
+    if (result.incomplete) return; // nothing to save â€” no arguments made
     hasSavedRef.current = true;
     // Backend-first; falls back to localStorage automatically if the
     // backend isn't configured/reachable. If the backend returns AI
@@ -118,7 +139,7 @@ export default function DebateReport({ config, messages, sessionId, onRetry, onN
         <div className="report-score-summary">
           <p className="report-score-summary-text">
             {result.overall >= 75
-              ? 'Strong performance — your arguments held up well under pressure.'
+              ? 'Strong performance â€” your arguments held up well under pressure.'
               : result.overall >= 50
               ? 'A solid start, with clear room to sharpen specific areas below.'
               : 'This one was rough, but every metric below is fixable with practice.'}
@@ -180,6 +201,22 @@ export default function DebateReport({ config, messages, sessionId, onRetry, onN
       )}
 
       <div className="report-actions">
+        {sessionId && (
+          <button
+            type="button"
+            className="report-btn-primary"
+            onClick={handlePublish}
+            disabled={publishState === 'publishing' || publishState === 'done'}
+          >
+            {publishState === 'done'
+              ? 'Published \u2713'
+              : publishState === 'publishing'
+              ? 'Publishing\u2026'
+              : publishState === 'error'
+              ? 'Failed - retry'
+              : 'Publish to Explore'}
+          </button>
+        )}
         <button type="button" className="report-btn-primary" onClick={onNewDebate}>
           Start a new debate
         </button>
@@ -191,7 +228,7 @@ export default function DebateReport({ config, messages, sessionId, onRetry, onN
       <p className="report-disclaimer">
         {aiFeedback
           ? 'Scored by AI evaluation of your full transcript.'
-          : 'Scores shown are an early estimate based on message count, length, and evidence language — not a full AI evaluation yet.'}
+          : 'Scores shown are an early estimate based on message count, length, and evidence language â€” not a full AI evaluation yet.'}
       </p>
     </div>
   );
