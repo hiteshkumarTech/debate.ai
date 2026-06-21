@@ -278,3 +278,41 @@
     width: 100%;
   }
 }
+
+/* ===== Responsive (Phase 2) ===== */
+/* Use dynamic viewport height so the composer stays visible on mobile.
+   100vh includes the browser chrome and pushes the input off-screen.
+   Navbar is 64px under 1024px and 72px at/above it. */
+.dchat {
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+  padding-top: 16px;
+  padding-bottom: 24px;
+}
+@media (min-width: 1024px) {
+  .dchat {
+    height: calc(100vh - 72px);
+    height: calc(100dvh - 72px);
+    padding-top: 32px;
+    padding-bottom: 60px;
+  }
+}
+
+/* Let the composer shrink instead of overflowing on narrow screens. */
+.dchat-text-input { min-width: 0; }
+
+/* Long URLs / unbroken strings never widen a bubble past its column. */
+.dchat-bubble { overflow-wrap: anywhere; }
+
+@media (max-width: 768px) {
+  .dchat-mic-btn,
+  .dchat-speaker-btn { width: 44px; height: 44px; }   /* touch targets */
+  .dchat-send-btn { padding: 11px 16px; }
+  .dchat-row { max-width: 92%; }
+  .dchat-end-btn { min-height: 40px; }
+}
+
+@media (max-width: 380px) {
+  .dchat-input-row { gap: 6px; }
+  .dchat-send-btn { padding: 11px 12px; font-size: 13px; }
+}
