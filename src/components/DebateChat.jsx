@@ -15,14 +15,14 @@ function generateMockReply(userMessage, { side, personality }) {
     'friendly-teacher': 'That\'s a reasonable start. Can you back it up with a specific example?',
     'strict-professor': 'Weak premise. Where is your evidence for that claim?',
     'aggressive-opponent': 'That argument falls apart the moment anyone asks for a source.',
-    'job-interviewer': 'Interesting point Ã¢â‚¬â€ walk me through how you\'d defend that under pressure.',
+    'job-interviewer': 'Interesting point ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â walk me through how you\'d defend that under pressure.',
   };
   const fallback = intensity[personality] || intensity['strict-professor'];
-  return `[local placeholder Ã¢â‚¬â€ no backend configured] ${fallback} I'm arguing ${opposite} this topic, and "${userMessage.slice(0, 60)}${userMessage.length > 60 ? 'Ã¢â‚¬Â¦' : ''}" doesn't address the core counter-evidence yet.`;
+  return `[local placeholder ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â no backend configured] ${fallback} I'm arguing ${opposite} this topic, and "${userMessage.slice(0, 60)}${userMessage.length > 60 ? 'ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦' : ''}" doesn't address the core counter-evidence yet.`;
 }
 
 // Turn a backend/network failure into a clear, human message shown in the
-// chat Ã¢â‚¬â€ never a fake AI reply. This fixes the bug where a 401 (not signed
+// chat ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â never a fake AI reply. This fixes the bug where a 401 (not signed
 // in) was silently swallowed and replaced with a canned line.
 function describeApiError(err) {
   const status = err instanceof ApiError ? err.status : undefined;
@@ -30,7 +30,7 @@ function describeApiError(err) {
     return 'You need to be signed in to debate with the AI. Please log in, then send your message again.';
   }
   if (status === 0) {
-    return "Couldn't reach the server Ã¢â‚¬â€ it may be waking up (the free backend sleeps after a few minutes idle). Wait ~30 seconds and send your message again.";
+    return "Couldn't reach the server ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â it may be waking up (the free backend sleeps after a few minutes idle). Wait ~30 seconds and send your message again.";
   }
   if (status === 429) {
     return 'The AI is being rate-limited right now. Wait a few seconds, then try again.';
@@ -183,7 +183,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null,
             <div className="dchat-bubble">
               {m.sender === 'ai' && voice.isSpeaking && m.id === messages[messages.length - 1].id && (
                 <span className="dchat-speaking-tag">
-                  <SpeakerWaveIcon /> SpeakingÃ¢â‚¬Â¦
+                  <SpeakerWaveIcon /> SpeakingÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦
                 </span>
               )}
               {m.text}
@@ -194,7 +194,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null,
         {isThinking && (
           <div className="dchat-row">
             <div className="dchat-avatar">AI</div>
-            <div className="dchat-bubble dchat-thinking">ThinkingÃ¢â‚¬Â¦</div>
+            <div className="dchat-bubble dchat-thinking">Thinking...</div>
           </div>
         )}
 
@@ -229,7 +229,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null,
           </select>
 
           {!voice.isRecognitionSupported && (
-            <span className="dchat-unsupported-note">Voice input isn't supported in this browser Ã¢â‚¬â€ typing still works.</span>
+            <span className="dchat-unsupported-note">Voice input isn't supported in this browser - typing still works.</span>
           )}
         </div>
 
@@ -248,7 +248,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null,
           <input
             type="text"
             className="dchat-text-input"
-            placeholder={voice.isListening ? 'ListeningÃ¢â‚¬Â¦ speak now' : 'Type your argument, or press the mic to speak'}
+            placeholder={voice.isListening ? 'ListeningÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¦ speak now' : 'Type your argument, or press the mic to speak'}
             value={voice.isListening ? voice.transcript : draft}
             onChange={(e) => setDraft(e.target.value)}
             disabled={voice.isListening || isThinking}
@@ -266,7 +266,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null,
           </button>
 
           <button type="submit" className="dchat-send-btn" disabled={isThinking}>
-            {isThinking ? 'ThinkingÃ¢â‚¬Â¦' : 'Send'}
+            {isThinking ? 'Thinking...' : 'Send'}
           </button>
         </form>
 
@@ -274,7 +274,7 @@ export default function DebateChat({ config, onEndDebate, initialSession = null,
           <p className="dchat-error-note">
             {voice.recognitionError === 'not-allowed'
               ? 'Microphone access was blocked. Allow it in your browser settings to use voice input.'
-              : 'Voice input had a problem Ã¢â‚¬â€ try again or type your argument.'}
+              : 'Voice input had a problem ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â try again or type your argument.'}
           </p>
         )}
 
