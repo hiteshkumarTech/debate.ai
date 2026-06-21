@@ -1,0 +1,32 @@
+/* ============================================
+   DebateAI - Animation layer (R3)
+   Staggered card/widget reveal + loading shimmer.
+   Reduced-motion users get content instantly (no animation).
+   fill-mode: backwards so finished cards release to normal CSS
+   and the R2 hover-lift keeps working.
+   ============================================ */
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes dai-rise {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card) {
+    animation: dai-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  }
+
+  /* Stagger within each grid (nth-child resets per parent container) */
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(1) { animation-delay: 0.03s; }
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(2) { animation-delay: 0.07s; }
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(3) { animation-delay: 0.11s; }
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(4) { animation-delay: 0.15s; }
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(5) { animation-delay: 0.19s; }
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(6) { animation-delay: 0.23s; }
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(7) { animation-delay: 0.27s; }
+  html :is(.setup-category, .setup-topic-item, .setup-persona-card, .setup-model-card, .setup-side-btn, .explore-card, .ach-card, .dash-nav-card, .goal-card, .isetup-category-card, .isetup-model-card, .personas-form-card, .personas-list-card, .progress-stat-card, .progress-topic-card, .about-skill-card, .lb-cta-card):nth-child(n+8) { animation-delay: 0.30s; }
+}
+
+/* Loading shimmer utility (auto-disabled under reduced motion via tokens.css) */
+@keyframes dai-shimmer { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+.dai-loading { animation: dai-shimmer 1.3s ease-in-out infinite; }

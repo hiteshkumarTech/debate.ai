@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import { TOPIC_CATEGORIES } from '../data/topics';
@@ -164,7 +165,7 @@ export default function Explore() {
         {error && <p className="explore-error">{error}</p>}
 
         {loading ? (
-          <p className="explore-status">Loading debates...</p>
+          <p className="explore-status dai-loading">Loading debates...</p>
         ) : debates.length === 0 ? (
           <div className="explore-empty">
             <p>No public debates yet{search || category !== 'All' ? ' for this filter' : ''}.</p>
@@ -217,40 +218,56 @@ export default function Explore() {
         )}
       </div>
 
-      {(detail || detailLoading) && (
-        <div className="explore-modal-overlay" onClick={closeDetail}>
-          <div className="explore-modal" onClick={(e) => e.stopPropagation()}>
-            <button type="button" className="explore-modal-close" onClick={closeDetail} aria-label="Close">{'\u00d7'}</button>
-            {detailLoading && <p className="explore-status">Loading transcript...</p>}
-            {!detailLoading && !detail && <p className="explore-status">Couldn't load this debate.</p>}
-            {!detailLoading && detail && (
-              <>
-                <div className="explore-modal-cat">{detail.category || 'Debate'}</div>
-                <h2 className="explore-modal-title">{detail.title}</h2>
-                <div className="explore-modal-meta">
-                  <span>{detail.author_name || 'Someone'}</span>
-                  {detail.side && <span>argued {detail.side === 'for' ? 'For' : 'Against'}</span>}
-                  {detail.ai_model && <span>vs {detail.ai_model}</span>}
-                  {typeof detail.score_overall === 'number' && <span>{detail.score_overall}%</span>}
-                  <span>{detail.views} views</span>
-                  <span>{detail.likes_count} likes</span>
-                </div>
-                <div className="explore-modal-transcript">
-                  {detail.messages.length === 0 ? (
-                    <p className="explore-status">No transcript saved.</p>
-                  ) : (
-                    detail.messages.map((m, i) => (
-                      <div key={i} className={`explore-bubble-row ${m.sender === 'user' ? 'is-user' : ''}`}>
-                        <div className="explore-bubble">{m.content}</div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <AnimatePresence>
+        {(detail || detailLoading) && (
+          <motion.div
+            className="explore-modal-overlay"
+            onClick={closeDetail}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+          >
+            <motion.div
+              className="explore-modal"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: 18, scale: 0.97 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 18, scale: 0.97 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <button type="button" className="explore-modal-close" onClick={closeDetail} aria-label="Close">{'\u00d7'}</button>
+              {detailLoading && <p className="explore-status dai-loading">Loading transcript...</p>}
+              {!detailLoading && !detail && <p className="explore-status">Couldn't load this debate.</p>}
+              {!detailLoading && detail && (
+                <>
+                  <div className="explore-modal-cat">{detail.category || 'Debate'}</div>
+                  <h2 className="explore-modal-title">{detail.title}</h2>
+                  <div className="explore-modal-meta">
+                    <span>{detail.author_name || 'Someone'}</span>
+                    {detail.side && <span>argued {detail.side === 'for' ? 'For' : 'Against'}</span>}
+                    {detail.ai_model && <span>vs {detail.ai_model}</span>}
+                    {typeof detail.score_overall === 'number' && <span>{detail.score_overall}%</span>}
+                    <span>{detail.views} views</span>
+                    <span>{detail.likes_count} likes</span>
+                  </div>
+                  <div className="explore-modal-transcript">
+                    {detail.messages.length === 0 ? (
+                      <p className="explore-status">No transcript saved.</p>
+                    ) : (
+                      detail.messages.map((m, i) => (
+                        <div key={i} className={`explore-bubble-row ${m.sender === 'user' ? 'is-user' : ''}`}>
+                          <div className="explore-bubble">{m.content}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </main>
   );
 }
