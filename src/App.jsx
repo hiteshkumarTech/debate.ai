@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import RouteMeta from './components/RouteMeta';
 import Footer from './components/Footer';
 import FloatingSignIn from './components/FloatingSignIn';
 import MobileNotice from './components/MobileNotice';
@@ -58,6 +59,7 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <RouteMeta />
         <Navbar />
         <AnimatedRoutes />
         <Footer />
