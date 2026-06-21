@@ -1,0 +1,176 @@
+/* ============================================
+   DebateAI - Premium surface skin (R2)
+   Re-themes shared cards / buttons / modals through the tokens.
+   "html " prefix guarantees precedence over component CSS while
+   leaving state modifiers (.is-selected/.is-active) to win.
+   ============================================ */
+
+/* Native controls + scrollbars follow the theme */
+:root { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* ===== Frosted cards + hover lift ===== */
+html .setup-category,
+html .setup-topic-item,
+html .setup-persona-card,
+html .setup-model-card,
+html .setup-side-btn,
+html .explore-card,
+html .ach-card,
+html .dash-nav-card,
+html .goal-card,
+html .isetup-category-card,
+html .isetup-model-card,
+html .personas-form-card,
+html .personas-list-card,
+html .progress-stat-card,
+html .progress-topic-card,
+html .about-skill-card,
+html .lb-cta-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card);
+  transition: transform 0.18s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+html .setup-category:hover,
+html .setup-topic-item:hover,
+html .setup-persona-card:hover,
+html .setup-model-card:hover,
+html .setup-side-btn:hover,
+html .explore-card:hover,
+html .ach-card:hover,
+html .dash-nav-card:hover,
+html .goal-card:hover,
+html .isetup-category-card:hover,
+html .isetup-model-card:hover,
+html .progress-topic-card:hover,
+html .about-skill-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-float);
+  border-color: var(--line-strong);
+}
+
+/* ===== Primary CTAs -> gradient + glow + press ===== */
+html .btn-primary,
+html .report-btn-primary,
+html .setup-start-btn,
+html .dchat-send-btn,
+html .dash-cta-primary,
+html .ach-cta-btn,
+html .explore-search-btn,
+html .isetup-start-btn,
+html .lb-cta-btn,
+html .personas-save-btn,
+html .progress-empty-cta,
+html .history-empty-cta,
+html .navbar-signup,
+html .navbar-drawer-signup,
+html .email-auth-submit {
+  background: var(--grad-accent);
+  color: #ffffff;
+  border: none;
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.30);
+  transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease, opacity 0.2s ease;
+}
+
+html .btn-primary:hover:not(:disabled),
+html .report-btn-primary:hover:not(:disabled),
+html .setup-start-btn:hover:not(:disabled),
+html .dchat-send-btn:hover:not(:disabled),
+html .dash-cta-primary:hover:not(:disabled),
+html .ach-cta-btn:hover:not(:disabled),
+html .explore-search-btn:hover:not(:disabled),
+html .isetup-start-btn:hover:not(:disabled),
+html .lb-cta-btn:hover:not(:disabled),
+html .personas-save-btn:hover:not(:disabled),
+html .progress-empty-cta:hover:not(:disabled),
+html .history-empty-cta:hover:not(:disabled),
+html .navbar-signup:hover:not(:disabled),
+html .navbar-drawer-signup:hover:not(:disabled),
+html .email-auth-submit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-glow);
+  filter: brightness(1.06);
+}
+
+html .btn-primary:active:not(:disabled),
+html .report-btn-primary:active:not(:disabled),
+html .setup-start-btn:active:not(:disabled),
+html .dchat-send-btn:active:not(:disabled),
+html .dash-cta-primary:active:not(:disabled),
+html .ach-cta-btn:active:not(:disabled),
+html .explore-search-btn:active:not(:disabled),
+html .isetup-start-btn:active:not(:disabled),
+html .lb-cta-btn:active:not(:disabled),
+html .personas-save-btn:active:not(:disabled),
+html .progress-empty-cta:active:not(:disabled),
+html .history-empty-cta:active:not(:disabled),
+html .navbar-signup:active:not(:disabled),
+html .navbar-drawer-signup:active:not(:disabled),
+html .email-auth-submit:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 3px 12px rgba(99, 102, 241, 0.24);
+  filter: brightness(0.98);
+}
+
+html .btn-primary:disabled,
+html .report-btn-primary:disabled,
+html .setup-start-btn:disabled,
+html .dchat-send-btn:disabled,
+html .dash-cta-primary:disabled,
+html .explore-search-btn:disabled,
+html .isetup-start-btn:disabled,
+html .personas-save-btn:disabled,
+html .navbar-signup:disabled,
+html .navbar-drawer-signup:disabled,
+html .email-auth-submit:disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  filter: none;
+}
+
+/* ===== Ghost / secondary buttons -> consistent press ===== */
+html .btn-ghost,
+html .report-btn-ghost,
+html .dash-cta-ghost,
+html .dchat-end-btn,
+html .isetup-company-btn,
+html .history-signout-btn {
+  transition: transform 0.15s ease, background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+html .btn-ghost:hover,
+html .report-btn-ghost:hover,
+html .dash-cta-ghost:hover,
+html .dchat-end-btn:hover,
+html .isetup-company-btn:hover,
+html .history-signout-btn:hover {
+  background: var(--paper-sunken);
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+html .btn-ghost:active,
+html .report-btn-ghost:active,
+html .dash-cta-ghost:active,
+html .dchat-end-btn:active,
+html .isetup-company-btn:active,
+html .history-signout-btn:active { transform: translateY(1px); }
+
+/* ===== Modal surface (true glass + blurred backdrop) ===== */
+html .explore-modal-overlay {
+  background: rgba(5, 6, 15, 0.62);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+html .explore-modal {
+  background: var(--paper-raised);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-float);
+}
+
+[data-theme="light"] html .explore-modal-overlay { background: rgba(26, 26, 46, 0.45); }
