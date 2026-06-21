@@ -18,7 +18,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import get_settings
 from app.db.session import Base, engine
 from app.models import entities  # noqa: F401 - registers models on Base
-from app.api.routes import ai, sessions, analytics, personas
+from app.api.routes import ai, sessions, analytics, personas, public
 
 settings = get_settings()
 
@@ -44,6 +44,7 @@ app.include_router(analytics.router)
 app.include_router(ai.router)
 app.include_router(sessions.router)
 app.include_router(personas.router)
+app.include_router(public.router)
 
 
 @app.get("/")

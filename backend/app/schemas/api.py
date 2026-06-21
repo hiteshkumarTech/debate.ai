@@ -57,7 +57,7 @@ class ReplyRequest(BaseModel):
     side: Optional[Literal["for", "against"]] = None
     personality: Optional[str] = None
     # When set, this custom instruction overrides the built-in personality
-    # style — this is how a saved custom persona drives the AI.
+    # style â€” this is how a saved custom persona drives the AI.
     custom_persona_instruction: Optional[str] = None
 
     # Interview framing
@@ -183,3 +183,33 @@ class PersonaOut(BaseModel):
     intensity: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+# ---------- Public gallery (Explore) ----------
+class PublishRequest(BaseModel):
+    session_id: int
+    category: Optional[str] = None
+
+
+class PublicDebateCard(BaseModel):
+    id: int
+    session_id: int
+    title: str
+    category: Optional[str] = None
+    ai_model: Optional[str] = None
+    side: Optional[str] = None
+    personality: Optional[str] = None
+    score_overall: Optional[int] = None
+    views: int
+    likes_count: int
+    author_name: str
+    published_at: datetime
+
+
+class PublicDebateDetail(PublicDebateCard):
+    messages: list[MessageOut] = Field(default_factory=list)
+
+
+class LikeResult(BaseModel):
+    liked: bool
+    likes_count: int
