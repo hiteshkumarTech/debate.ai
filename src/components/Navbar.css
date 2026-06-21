@@ -11,90 +11,107 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 72px;
-  gap: 24px;
+  height: 64px;
+  gap: 16px;
+}
+@media (min-width: 1024px) {
+  .navbar-inner { height: 72px; gap: 24px; }
 }
 
-.navbar-links {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1;
-  justify-content: center;
-}
-
-.navbar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
+.navbar-brand { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .navbar-brand-mark {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
-  background: var(--ink);
-  color: var(--paper);
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 700;
-  font-size: 17px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 32px; height: 32px; border-radius: 9px;
+  background: var(--ink); color: var(--paper);
+  font-family: var(--font-display); font-style: italic; font-weight: 700; font-size: 17px;
+  display: flex; align-items: center; justify-content: center;
 }
-
 .navbar-brand-name {
-  font-family: var(--font-display);
-  font-style: italic;
-  font-weight: 600;
-  font-size: 19px;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display); font-style: italic; font-weight: 600;
+  font-size: 19px; letter-spacing: -0.01em;
 }
 
+/* Inline links - flex:1 + min-width:0 + contained scroll means they can never
+   push the page sideways; if they ever run out of room they scroll within the bar. */
+.navbar-links {
+  display: flex; align-items: center; gap: 6px;
+  flex: 1; min-width: 0; justify-content: center;
+  overflow-x: auto; scrollbar-width: none;
+}
+.navbar-links::-webkit-scrollbar { display: none; }
 .navbar-link {
-  font-size: 14.5px;
-  font-weight: 500;
-  color: var(--ink-soft);
-  padding: 9px 16px;
-  border-radius: var(--radius-pill);
+  font-size: 14.5px; font-weight: 500; color: var(--ink-soft);
+  padding: 9px 16px; border-radius: var(--radius-pill);
   transition: color 0.15s ease, background 0.15s ease;
+  white-space: nowrap; flex-shrink: 0;
 }
+.navbar-link:hover { color: var(--ink); background: var(--paper-sunken); }
+.navbar-link.is-active { color: var(--ink); background: var(--indigo-50); }
 
-.navbar-link:hover {
-  color: var(--ink);
-  background: var(--paper-sunken);
-}
-
-.navbar-link.is-active {
-  color: var(--ink);
-  background: var(--indigo-50);
-}
-
+.navbar-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .navbar-signup {
-  display: inline-flex;
-  align-items: center;
-  flex-shrink: 0;
-  padding: 10px 20px;
-  border-radius: var(--radius-pill);
-  background: var(--ink);
-  color: var(--paper);
-  font-size: 14px;
-  font-weight: 600;
+  display: inline-flex; align-items: center; flex-shrink: 0;
+  padding: 10px 20px; border-radius: var(--radius-pill);
+  background: var(--ink); color: var(--paper); font-size: 14px; font-weight: 600;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  border: none; cursor: pointer; font-family: inherit;
+}
+.navbar-signup:hover { transform: translateY(-1px); box-shadow: var(--shadow-card); }
+.navbar-signup:disabled { opacity: 0.6; cursor: default; transform: none; box-shadow: none; }
+
+/* Hamburger (mobile only) - 44px touch target */
+.navbar-burger {
+  display: none; width: 44px; height: 44px; border-radius: var(--radius-md);
+  align-items: center; justify-content: center; flex-direction: column; gap: 4px;
+  background: none; border: none; cursor: pointer; flex-shrink: 0;
+}
+.navbar-burger span { display: block; width: 22px; height: 2px; background: var(--ink); border-radius: 2px; }
+
+/* Overlay + left slide-in drawer */
+.navbar-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(26, 26, 46, 0.40);
+  opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 60;
+}
+.navbar-overlay.is-open { opacity: 1; pointer-events: auto; }
+.navbar-drawer {
+  position: fixed; top: 0; left: 0; bottom: 0;
+  width: 82%; max-width: 320px;
+  background: var(--paper-raised); border-right: 1px solid var(--line);
+  box-shadow: var(--shadow-float);
+  transform: translateX(-100%); transition: transform 0.22s ease;
+  z-index: 70; display: flex; flex-direction: column;
+  padding: 16px 16px 24px; overflow-y: auto;
+}
+.navbar-drawer.is-open { transform: translateX(0); }
+.navbar-drawer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.navbar-drawer-close {
+  width: 44px; height: 44px; font-size: 26px; line-height: 1; color: var(--ink-soft);
+  border: none; background: none; cursor: pointer; border-radius: var(--radius-md);
+}
+.navbar-drawer-close:hover { background: var(--paper-sunken); color: var(--ink); }
+.navbar-drawer-links { display: flex; flex-direction: column; gap: 2px; }
+.navbar-drawer-link {
+  padding: 13px 14px; border-radius: var(--radius-md);
+  font-size: 16px; font-weight: 500; color: var(--ink-soft);
+}
+.navbar-drawer-link:hover { background: var(--paper-sunken); color: var(--ink); }
+.navbar-drawer-link.is-active { background: var(--indigo-50); color: var(--indigo-600); font-weight: 600; }
+.navbar-drawer-signup {
+  margin-top: 16px; padding: 14px; border-radius: var(--radius-pill);
+  background: var(--ink); color: var(--paper); font-size: 15px; font-weight: 600;
+  border: none; cursor: pointer; font-family: inherit;
+}
+.navbar-drawer-signup:disabled { opacity: 0.6; cursor: default; }
+
+/* Tablet-landscape / small laptop: compress so 9 links fit without scrolling */
+@media (max-width: 1080px) {
+  .navbar-link { padding: 8px 11px; font-size: 13.5px; }
+  .navbar-links { gap: 2px; }
 }
 
-.navbar-signup:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-card);
-}
-
-@media (max-width: 760px) {
-  .navbar-links {
-    display: none;
-  }
-  .navbar-signup {
-    padding: 9px 16px;
-    font-size: 13px;
-  }
+/* <= 768px: drawer replaces the inline nav */
+@media (max-width: 768px) {
+  .navbar-links { display: none; }
+  .navbar-signup { display: none; }   /* lives inside the drawer on mobile */
+  .navbar-burger { display: flex; }
+  .navbar-overlay { display: block; }
 }
