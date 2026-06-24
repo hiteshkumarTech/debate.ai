@@ -8,7 +8,7 @@ class GoogleProvider(AIProvider):
     name = "google"
     is_live = True
 
-    DEFAULT_MODEL = "gemini-2.5-flash"
+    DEFAULT_MODEL = "gemini-2.5-flash-lite"
 
     def __init__(self, api_key: str, model: str | None = None):
         try:
@@ -20,7 +20,7 @@ class GoogleProvider(AIProvider):
             ) from e
         genai.configure(api_key=api_key)
         self._genai = genai
-        self._model_name = model or self.DEFAULT_MODEL
+        self._model_name = self.DEFAULT_MODEL
 
     def generate_reply(self, system_prompt: str, history: list[AIMessage]) -> str:
         try:
